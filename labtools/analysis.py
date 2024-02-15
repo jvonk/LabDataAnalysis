@@ -24,13 +24,7 @@ def covariance(x, y):
     >>> covariance([5,6,7],[3,2,1])==-1
     True
     """
-    assert len(x) == len(y)
-    u_x, u_y = np.mean(x), np.mean(y)
-    sum_covar = 0
-    for i in range(len(x)):
-        sum_covar += (x[i] - u_x) * (y[i] - u_y)
-
-    return sum_covar / (len(x) - 1)
+    return np.cov(np.vstack([x, y]), ddof = 1)[0, 1]
 
 
 def variance(x):
@@ -40,16 +34,11 @@ def variance(x):
     >>> variance([1,2,3])
     1.0
     """
-    u_x = np.mean(x)
-    sum_covar = 0
-    for i in range(len(x)):
-        sum_covar += (x[i] - u_x) ** 2
-
-    return sum_covar / (len(x) - 1)
+    return np.var(x, ddof=1)
 
 
 def std(x):
-    return (variance(x)) ** 0.5
+    return np.std(x, ddof=1)
 
 
 def quartrature_sum(x):
@@ -66,10 +55,7 @@ def quartrature_sum(x):
 
 
 def correlation_coefficients(x, y):
-    sigma_xy = covariance(x, y)
-    sigma_x = np.sqrt(variance(x))
-    sigma_y = np.sqrt(variance(y))
-    return sigma_xy / (sigma_x * sigma_y)
+    return np.corrcoef(np.vstack([x, y]))
 
 
 def linear_fit_error(x, y, m, c, yerr):
@@ -99,12 +85,12 @@ def simple_least_squares_linear(x, y):
     """
     Calculates a simple linear fit
 
-    >>> simple_least_squares_linear([1,2,3,4], [1,2,3,4])
-    (1.0, 0.0)
-    >>> simple_least_squares_linear([1,2,3,4], [4,3,2,1])
-    (-1.0, 5.0)
-    >>> simple_least_squares_linear([1,2,3,4], [10, 10, 10, 10])
-    (0.0, 10.0)
+    >>> print("({:.3f}, {:.3f})".format(*simple_least_squares_linear([1,2,3,4], [1,2,3,4])))
+    (1.000, 0.000)
+    >>> print("({:.3f}, {:.3f})".format(*simple_least_squares_linear([1,2,3,4], [4,3,2,1])))
+    (-1.000, 5.000)
+    >>> print("({:.3f}, {:.3f})".format(*simple_least_squares_linear([1,2,3,4], [10, 10, 10, 10])))
+    (0.000, 10.000)
     """
     sigma_xy = covariance(x, y)
     sigma_2 = variance(x)
@@ -130,8 +116,8 @@ def weighted_least_squares_linear(x, y, err=[]):
     if err == []:
         err = combine_linear_uncertainties(x, y)
 
-    sum_mult2 = lambda x, y: sum(np.multiply(x, y))
-    sum_mult3 = lambda x, y, z: sum(np.multiply(np.multiply(x, y), z))
+    sum_mult2 = lambda x, y: np.einsum("i,i", x, y)
+    sum_mult3 = lambda x, y, z: np.einsum("i,i,i", x, y)
 
     w = np.divide(1, np.power(err, 2))
     x2 = np.power(x, 2)

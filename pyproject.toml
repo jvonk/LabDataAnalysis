@@ -1,13 +1,14 @@
 [project]
-name = "LabDataAnalysis"
+name = "labtools"
 version = "0.0.1"
 license = {file = "LICENSE"}
-description = "Python Lab Files"
+description = "Python Lab Tools"
 readme = "README.md"
 dependencies = [
     "numpy",
     "uncertainties",
     "matplotlib",
+    "scipy>=1.11",
     "pytest"
 ]
 
